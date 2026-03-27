@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Competency Table — Monochrome</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --sage: #1D9E75; --sage-light: #E1F5EE; --sage-mid: #5DCAA5;
+  --ink: #2C2C2A; --ink-mid: #5F5E5A; --ink-light: #888780;
+  --border: #D3D1C7; --bg: #F1EFE8; --white: #ffffff;
+  --gold: #BA7517; --gold-light: #FAEEDA;
+  --red: #A32D2D; --red-light: #FCEBEB;
+  --blue: #185FA5; --blue-light: #E6F1FB;
+}
+body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; }
+.header { background: var(--ink); padding: 28px 40px 24px; position: sticky; top: 0; z-index: 100; }
+.header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.header-logo { font-family: 'DM Serif Display', serif; font-size: 15px; color: var(--sage-mid); }
+.header-right { display: flex; align-items: center; gap: 10px; }
+.header-badge { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.4); padding: 4px 10px; border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; }
+.lang-toggle { display: flex; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; overflow: hidden; }
+.lang-btn { padding: 5px 12px; font-size: 11px; font-weight: 700; font-family: 'Noto Sans JP', sans-serif; background: transparent; border: none; cursor: pointer; color: rgba(255,255,255,0.5); transition: all 0.15s; }
+.lang-btn.active { background: rgba(255,255,255,0.15); color: #fff; }
+.header-title { font-size: 24px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+.header-sub { font-size: 13px; color: rgba(255,255,255,0.45); font-weight: 300; }
+.filter-bar { background: var(--white); border-bottom: 1px solid var(--border); padding: 12px 40px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; position: sticky; top: 120px; z-index: 90; }
+.filter-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-light); margin-right: 4px; }
+.filter-btn { padding: 6px 14px; border: 1.5px solid var(--border); border-radius: 20px; background: var(--white); font-size: 12px; font-weight: 500; font-family: 'Noto Sans JP', sans-serif; color: var(--ink-mid); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+.filter-btn:hover { background: var(--bg); }
+.filter-btn.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+.filter-btn.jl-btn { border-radius: 6px; font-weight: 700; min-width: 36px; text-align: center; }
+.filter-btn.jl-btn.active { background: var(--sage); border-color: var(--sage); }
+.jl-legend { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+.jl-chip { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 4px; }
+.jl-chip.jl0 { background: #F1EFE8; color: var(--ink-light); }
+.jl-chip.jl1 { background: #E1F5EE; color: #0F6E56; }
+.jl-chip.jl2 { background: #E6F1FB; color: #0C447C; }
+.jl-chip.jl3 { background: #FAEEDA; color: #854F0B; }
+.jl-chip.jl4 { background: #FCEBEB; color: var(--red); }
+.content { padding: 28px 40px; max-width: 1200px; margin: 0 auto; }
+.section { margin-bottom: 36px; }
+.section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid var(--ink); }
+.section-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--ink); display: flex; align-items: center; justify-content: center; font-size: 14px; color: #fff; font-weight: 700; }
+.section-title { font-size: 18px; font-weight: 700; }
+.section-tag { font-size: 11px; font-weight: 500; color: var(--ink-light); padding: 3px 10px; border: 1px solid var(--border); border-radius: 4px; }
+.comp-table-wrap { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 16px; }
+.comp-table-header { padding: 16px 20px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.comp-name { font-size: 15px; font-weight: 700; }
+.comp-group-tag { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; white-space: nowrap; }
+.comp-group-tag.all { background: var(--sage-light); color: var(--sage); }
+.comp-group-tag.const { background: var(--gold-light); color: var(--gold); }
+.comp-group-tag.dev { background: var(--blue-light); color: var(--blue); }
+.comp-group-tag.sv { background: #F4C0D1; color: #993556; }
+.jl-grid { display: grid; grid-template-columns: repeat(5, 1fr); }
+.jl-col { border-right: 1px solid var(--border); transition: background 0.15s; }
+.jl-col:last-child { border-right: none; }
+.jl-col.highlighted { background: #FFFEF5; }
+.jl-col.dimmed { opacity: 0.35; }
+.jl-col-header { padding: 10px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.jl-num { font-size: 13px; font-weight: 700; }
+.jl-num.jl0 { color: var(--ink-light); }
+.jl-num.jl1 { color: var(--sage); }
+.jl-num.jl2 { color: var(--blue); }
+.jl-num.jl3 { color: var(--gold); }
+.jl-num.jl4 { color: var(--red); }
+.jl-salary { font-size: 10px; color: var(--ink-light); font-weight: 300; }
+.jl-col-body { padding: 14px 14px; font-size: 12px; color: var(--ink-mid); line-height: 1.75; min-height: 120px; }
+.jl-col-body .empty { color: var(--ink-light); font-style: italic; font-size: 11px; }
+.score-guide { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 28px; }
+.score-guide-header { padding: 14px 20px; background: var(--ink); color: #fff; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+.score-guide-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
+.score-guide-item { padding: 16px 20px; border-right: 1px solid var(--border); }
+.score-guide-item:last-child { border-right: none; }
+.score-num { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+.score-num.s1 { color: var(--red); } .score-num.s2 { color: var(--gold); }
+.score-num.s3 { color: var(--sage); } .score-num.s4 { color: var(--blue); }
+.score-key { font-size: 11px; font-weight: 700; margin-bottom: 4px; }
+.score-key.s1 { color: var(--red); } .score-key.s2 { color: var(--gold); }
+.score-key.s3 { color: var(--sage); } .score-key.s4 { color: var(--blue); }
+.score-desc { font-size: 12px; color: var(--ink-mid); line-height: 1.6; }
+.back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-light); text-decoration: none; padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--white); margin-bottom: 20px; transition: all 0.15s; }
+.back-link:hover { color: var(--ink); border-color: var(--ink); }
+.bilingual .ja, .bilingual .en { display: block; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="header-logo">Monochrome</div>
+    <div class="header-right">
+      <div class="header-badge">2025 Dec Review</div>
+      <div class="lang-toggle">
+        <button class="lang-btn active" id="hl-ja" onclick="setLang('ja')">JP</button>
+        <button class="lang-btn" id="hl-en" onclick="setLang('en')">EN</button>
+      </div>
+    </div>
+  </div>
+  <div class="header-title" id="header-title">Competency Table</div>
+  <div class="header-sub" id="header-sub">各Job Levelで期待されるコンピテンシーの定義一覧</div>
+</div>
+
+<div class="filter-bar">
+  <span class="filter-label" id="filter-label-team">Team</span>
+  <button class="filter-btn active" id="fb-all" onclick="filterTeam('all',this)" data-ja="すべて" data-en="All">すべて</button>
+  <button class="filter-btn" id="fb-common" onclick="filterTeam('common',this)" data-ja="全員共通" data-en="All Members">全員共通</button>
+  <button class="filter-btn" id="fb-const" onclick="filterTeam('const',this)" data-ja="Const / Energy" data-en="Const / Energy">Const / Energy</button>
+  <button class="filter-btn" id="fb-dev" onclick="filterTeam('dev',this)" data-ja="Dev（Engineer / Designer）" data-en="Dev (Engineer / Designer)">Dev（Engineer / Designer）</button>
+  <button class="filter-btn" id="fb-devmgr" onclick="filterTeam('devmgr',this)" data-ja="Dev Manager" data-en="Dev Manager">Dev Manager</button>
+  <button class="filter-btn" id="fb-sv" onclick="filterTeam('sv',this)" data-ja="Supervisor" data-en="Supervisor">Supervisor</button>
+  <div style="width:1px;height:20px;background:var(--border);margin:0 8px;"></div>
+  <span class="filter-label">JL</span>
+  <button class="filter-btn jl-btn" onclick="filterJL('all',this)" data-ja="全" data-en="All">全</button>
+  <button class="filter-btn jl-btn" onclick="filterJL(0,this)">0</button>
+  <button class="filter-btn jl-btn" onclick="filterJL(1,this)">1</button>
+  <button class="filter-btn jl-btn" onclick="filterJL(2,this)">2</button>
+  <button class="filter-btn jl-btn" onclick="filterJL(3,this)">3</button>
+  <button class="filter-btn jl-btn" onclick="filterJL(4,this)">4</button>
+  <div class="jl-legend">
+    <span class="jl-chip jl0">JL0</span><span class="jl-chip jl1">JL1</span>
+    <span class="jl-chip jl2">JL2</span><span class="jl-chip jl3">JL3</span><span class="jl-chip jl4">JL4+</span>
+  </div>
+</div>
+
+<div class="content">
+  <a class="back-link" href="evaluation-tool.html" id="back-link">← 評価ツールに戻る</a>
+
+  <!-- SCORE GUIDE -->
+  <div class="score-guide">
+    <div class="score-guide-header" id="sg-header">スコアの定義 / Score Definition</div>
+    <div class="score-guide-grid" id="score-guide-grid"></div>
+  </div>
+
+  <!-- SECTION: 全員共通 -->
+  <div class="section" data-team="common" id="section-common">
+    <div class="section-header">
+      <div class="section-icon">共</div>
+      <div class="section-title" id="st-common">全員共通 / All Members</div>
+      <div class="section-tag" id="stag-common">IC / PM 共通</div>
+    </div>
+
+    <div id="comp-comm" class="comp-table-wrap" data-team="common">
+      <div class="comp-table-header">
+        <div class="comp-name" data-ja="Open communication & team work — Leadership & Followership" data-en="Open communication & team work — Leadership & Followership">Open communication & team work — Leadership & Followership</div>
+        <div class="comp-group-tag all" data-ja="全員共通" data-en="All Members">全員共通</div>
+      </div>
+      <div class="jl-grid">
+        <div class="jl-col" data-jl="0"><div class="jl-col-header"><span class="jl-num jl0">JL 0</span><span class="jl-salary">3.5〜5.0M</span></div>
+          <div class="jl-col-body" data-ja="対人コミュニケーションの基本＆オープンコミュニケーションの実行<br><br>1. 自分が得た情報をチームメンバーに適宜伝える<br>2. 困っているメンバーに手を差し伸べる<br>3. 相手の意図・気持ちを理解し、自分の意図を伝えられる<br>4. 要点を簡潔にまとめられる<br>5. 批判・改善点の指摘は当事者がいない場ではしない" data-en="Basic interpersonal communication &amp; open communication<br><br>1. Share information gained with team members as appropriate<br>2. Help members who are struggling<br>3. Understand others' intent and convey your own<br>4. Summarize key points concisely<br>5. Do not criticize or suggest improvements in places where the person involved is absent">対人コミュニケーションの基本＆オープンコミュニケーションの実行<br><br>1. 自分が得た情報をチームメンバーに適宜伝える<br>2. 困っているメンバーに手を差し伸べる<br>3. 相手の意図・気持ちを理解し、自分の意図を伝えられる<br>4. 要点を簡潔にまとめられる<br>5. 批判・改善点の指摘は当事者がいない場ではしない</div></div>
+        <div class="jl-col" data-jl="1"><div class="jl-col-header"><span class="jl-num jl1">JL 1</span><span class="jl-salary">5.5〜6.5M</span></div>
+          <div class="jl-col-body" data-ja="Understanding yourself and others<br><br>1. 自らの良い面・悪い面を把握し、FBを受け止められる<br>2. 自分の考えや進捗をチームが理解しスムーズなコミュニケーションができる<br>3. 不明確な指示には推測せず明確化の質問ができる<br>4. 望む結果にならなくてもチームの判断を積極的にサポートできる" data-en="Understanding yourself and others<br><br>1. Know your strengths/weaknesses and accept feedback<br>2. Keep the team informed of your progress and thinking<br>3. Ask clarifying questions rather than guessing unclear instructions<br>4. Support team decisions even when the outcome isn't what you wanted">Understanding yourself and others<br><br>1. 自らの良い面・悪い面を把握し、FBを受け止められる<br>2. 自分の考えや進捗をチームが理解しスムーズなコミュニケーションができる<br>3. 不明確な指示には推測せず明確化の質問ができる<br>4. 望む結果にならなくてもチームの判断を積極的にサポートできる</div></div>
+        <div class="jl-col" data-jl="2"><div class="jl-col-header"><span class="jl-num jl2">JL 2</span><span class="jl-salary">7.0〜8.0M</span></div>
+          <div class="jl-col-body" data-ja="Have Backbone; Disagree &amp; Commit<br><br>新しいアイディアや建設的な反対意見、リーダーの誤りを冷静かつ積極的に発言し、会社発展のための議論ができる。多くの人とロジカルで対等な議論ができる。同僚のアウトプット品質がバーに満たない場合はFBできる。" data-en="Have Backbone; Disagree &amp; Commit<br><br>Calmly and actively voice new ideas, constructive disagreement, and leaders' mistakes to enable discussion that helps the company grow. Can engage in logical, equal debate with many people. Can give feedback when colleagues' output quality falls short.">Have Backbone; Disagree &amp; Commit<br><br>新しいアイディアや建設的な反対意見、リーダーの誤りを冷静かつ積極的に発言し、会社発展のための議論ができる。多くの人とロジカルで対等な議論ができる。同僚のアウトプット品質がバーに満たない場合はFBできる。</div></div>
+        <div class="jl-col" data-jl="3"><div class="jl-col-header"><span class="jl-num jl3">JL 3</span><span class="jl-salary">8.5〜9.5M</span></div>
+          <div class="jl-col-body" data-ja="Dealing with Ambiguity（開拓力）<br><br>不確実・不明確な状況で自ら模索して物事を前に進められる。一人で実行計画を立て、必要な情報・サポートを求め業務を推進できる。意思決定に必要な情報を整理しステークホルダーに提案できる。<br><br>Talents Empowerment（才能のサポート）<br>メンバーへの適切なFBを通じてCompetencyを高め、力を最大限引き出せる。" data-en="Dealing with Ambiguity<br><br>Navigate uncertain/unclear situations independently. Create execution plans on your own, seek necessary information and support. Organize information needed for decisions and propose to stakeholders.<br><br>Talents Empowerment<br>Elevate members' competency through appropriate feedback and draw out their maximum potential.">Dealing with Ambiguity（開拓力）<br><br>不確実・不明確な状況で自ら模索して物事を前に進められる。一人で実行計画を立て、必要な情報・サポートを求め業務を推進できる。意思決定に必要な情報を整理しステークホルダーに提案できる。<br><br>Talents Empowerment（才能のサポート）<br>メンバーへの適切なFBを通じてCompetencyを高め、力を最大限引き出せる。</div></div>
+        <div class="jl-col" data-jl="4"><div class="jl-col-header"><span class="jl-num jl4">JL 4</span><span class="jl-salary">10M〜</span></div>
+          <div class="jl-col-body" data-ja="Represent team &amp; Manage your manager<br><br>1. チームの意見を集約しManagerや他チームに共有・提案・交渉できる<br>2. Managerを適切なコミュニケーションで動かせる<br>3. リーダーとしてチームにビジョンを説明し動機づけできる<br><br>Hiring manager<br>チームに必要な人材を採用でき、採用した人材の8割以上が期待通りのPerformanceを発揮する。" data-en="Represent team &amp; Manage your manager<br><br>1. Aggregate team opinions and share/propose/negotiate with managers and other teams<br>2. Move managers through appropriate communication<br>3. As a leader, explain vision to team and motivate them<br><br>Hiring manager<br>Can hire necessary talent; 80%+ of hires perform at or above expectations.">Represent team &amp; Manage your manager<br><br>1. チームの意見を集約しManagerや他チームに共有・提案・交渉できる<br>2. Managerを適切なコミュニケーションで動かせる<br>3. リーダーとしてチームにビジョンを説明し動機づけできる<br><br>Hiring manager<br>チームに必要な人材を採用でき、採用した人材の8割以上が期待通りのPerformanceを発揮する。</div></div>
+      </div>
+    </div>
+
+    <div id="comp-learning" class="comp-table-wrap" data-team="common">
+      <div class="comp-table-header">
+        <div class="comp-name" data-ja="Learning & Inventing as a team" data-en="Learning & Inventing as a team">Learning & Inventing as a team</div>
+        <div class="comp-group-tag all" data-ja="全員共通" data-en="All Members">全員共通</div>
+      </div>
+      <div class="jl-grid">
+        <div class="jl-col" data-jl="0"><div class="jl-col-header"><span class="jl-num jl0">JL 0</span></div><div class="jl-col-body" data-ja="成長・学習意欲<br><br>業務に関連する様々なことに興味を持ち、自発的に調べ・勉強する意欲がある。自らの能力開発に強い関心がある。" data-en="Growth &amp; Learning Motivation<br><br>Have interest in various matters related to work, with motivation to research and study proactively. Have strong interest in self-development.">成長・学習意欲<br><br>業務に関連する様々なことに興味を持ち、自発的に調べ・勉強する意欲がある。</div></div>
+        <div class="jl-col" data-jl="1"><div class="jl-col-header"><span class="jl-num jl1">JL 1</span></div><div class="jl-col-body" data-ja="学習・チームへの還元<br><br>何にでも興味を持ち、本質を探ろうとする。自らの失敗から学ぶ。学びを社内Wiki等に端的かつわかりやすくまとめ、積極的にチームに共有・還元する。" data-en="Learning &amp; Team Contribution<br><br>Be curious about everything and seek the essence. Learn from failures. Summarize learnings concisely in internal wiki and actively share with the team.">学習・チームへの還元<br><br>何にでも興味を持ち、本質を探ろうとする。学びをチームに共有・還元する。</div></div>
+        <div class="jl-col" data-jl="2"><div class="jl-col-header"><span class="jl-num jl2">JL 2</span></div><div class="jl-col-body" data-ja="積極性・実行力<br><br>試したことのないアイディアを恐れずに実施し、効果測定ができる。別チームの役割や文化を理解して仕事に食い込む。" data-en="Proactiveness &amp; Execution<br><br>Try new ideas without fear and measure results. Understand other teams' roles and culture and get involved.">積極性・実行力<br><br>試したことのないアイディアを恐れずに実施し、効果測定ができる。</div></div>
+        <div class="jl-col" data-jl="3"><div class="jl-col-header"><span class="jl-num jl3">JL 3</span></div><div class="jl-col-body" data-ja="Mechanism（仕組みづくり）<br><br>継続的に発生している問題に対して、利益へのインパクトを定量化したうえで問題の根本を取り除く仕組みを構築できる。自分やチームメンバーのタスクの効率化を加速する仕組みを考案・実行する。<br><br>学びの加速と積み重ね<br>チームとしての学びを加速し定着させる仕組みを作り、運用を担保する。" data-en="Mechanism Building<br><br>For recurring problems, quantify their impact on business then build systems to eliminate root causes. Devise and implement systems to accelerate task efficiency for self and team members.<br><br>Accelerating and Accumulating Learning<br>Build systems to accelerate and solidify team learning, and ensure they are operated.">Mechanism（仕組みづくり）<br><br>継続的な問題の根本を取り除く仕組みを構築できる。チームの学びを加速させる仕組みを作る。</div></div>
+        <div class="jl-col" data-jl="4"><div class="jl-col-header"><span class="jl-num jl4">JL 4</span></div><div class="jl-col-body" data-ja="Growth Driver（成長の源泉）<br><br>売り上げや利益を伸ばす新しい方策を立案し実行する。自らアイディアを示すことで範を垂れ、チームメンバーからの創造的意見を刺激する。" data-en="Growth Driver<br><br>Plan and execute new measures to grow revenue and profit. Lead by example with ideas and stimulate creative contributions from team members.">Growth Driver（成長の源泉）<br><br>売り上げや利益を伸ばす新しい方策を立案し実行する。</div></div>
+      </div>
+    </div>
+
+    <div id="comp-freedom" class="comp-table-wrap" data-team="common">
+      <div class="comp-table-header">
+        <div class="comp-name" data-ja="Freedom and Responsibility / 自由と責任" data-en="Freedom and Responsibility">Freedom and Responsibility / 自由と責任</div>
+        <div class="comp-group-tag all" data-ja="全員共通" data-en="All Members">全員共通</div>
+      </div>
+      <div class="jl-grid">
+        <div class="jl-col" data-jl="0"><div class="jl-col-header"><span class="jl-num jl0">JL 0</span></div><div class="jl-col-body" data-ja="Earn Trust（信頼の獲得）<br><br>周囲に誠実に接し信頼される対応ができる。ミスをしても隠さずスピーディに報告できる。約束・期限・ルールを守り、リスクがあるときは速やかに相談する。" data-en="Earn Trust<br><br>Act with integrity and earn others' trust. Report mistakes promptly without hiding them. Keep promises, deadlines, and rules; consult quickly when there's risk.">Earn Trust（信頼の獲得）<br><br>誠実に接し信頼される対応ができる。ミスをしても隠さず報告できる。</div></div>
+        <div class="jl-col" data-jl="1"><div class="jl-col-header"><span class="jl-num jl1">JL 1</span></div><div class="jl-col-body" data-ja="Insist on the highest standards<br><br>自らの仕事のクオリティに責任を持ち、不良を下流に流さない。成果物に高いバーを設けており、常に最高水準を目指す。<br><br>Self management<br>集中力・熱意を長く維持して仕事に取り組める。体調管理ができており、過度な負荷の時は助けを求められる。<br><br>Speed &amp; Prioritization<br>自ら期限を設定し仕事を完遂できる。" data-en="Insist on the highest standards<br><br>Take responsibility for quality; don't pass defects downstream. Set high bars for deliverables and always aim for the highest standard.<br><br>Self management<br>Maintain focus and enthusiasm for long periods. Manage health; ask for help under excessive load.<br><br>Speed &amp; Prioritization<br>Set own deadlines and complete work.">Insist on the highest standards<br><br>仕事の品質に責任を持ち不良を下流に流さない。Self management。Speed &amp; Prioritization。</div></div>
+        <div class="jl-col" data-jl="2"><div class="jl-col-header"><span class="jl-num jl2">JL 2</span></div><div class="jl-col-body" data-ja="Ownership<br><br>指示を待つのではなく、問題やチャンスに気づき主体的に行動する。任された業務のゴールを理解し各部署と連携できる。一人で解決困難な場合は適切なタイミングで助けを求められる。<br><br>Customer Understanding（顧客理解）<br>顧客が何を求めているか理解しており、顧客視点での判断ができる。" data-en="Ownership<br><br>Notice problems and opportunities without waiting for instructions; act proactively. Understand the goal of assigned work and collaborate across departments. Seek help at the right time when unable to solve alone.<br><br>Customer Understanding<br>Understand what customers need and make decisions from their perspective.">Ownership<br><br>問題やチャンスに気づき主体的に行動する。Customer Understanding（顧客理解）。</div></div>
+        <div class="jl-col" data-jl="3"><div class="jl-col-header"><span class="jl-num jl3">JL 3</span></div><div class="jl-col-body" data-ja="Deliver Results（結果を出す）<br><br>重要なマイルストーン・チェックポイントを理解しており、プロジェクト管理ができる。社外Stakeholderも含めキーパーソンにInfluenceを発揮でき、ブロッカーを除去できる。<br><br>Bias for Action / Autonomous Prioritization<br>リスクや優先順位をクイックかつロジカルに判断し前に進められる。<br><br>Delegation（業務委任）<br>漏れのないプランを策定し、メンバーにDelegationできる。" data-en="Deliver Results<br><br>Understand key milestones and checkpoints; manage projects. Influence key people including external stakeholders and remove blockers.<br><br>Bias for Action / Autonomous Prioritization<br>Quickly and logically assess risks and priorities and move things forward.<br><br>Delegation<br>Develop comprehensive plans and delegate to members.">Deliver Results / Bias for Action / Delegation。プロジェクト管理ができ、ブロッカーを除去できる。</div></div>
+        <div class="jl-col" data-jl="4"><div class="jl-col-header"><span class="jl-num jl4">JL 4</span></div><div class="jl-col-body" data-ja="自由と責任の促進<br><br>自由と責任をメンバーが発揮しやすい仕組みを整えるとともに、時には説明責任・結果責任を求め全体のフェアネスを担保する。<br><br>Leveraging external stakeholders<br>あらゆる社外ステークホルダーと深い信頼関係を構築し、その力を会社の成長にレバレッジできる。" data-en="Promoting Freedom &amp; Responsibility<br><br>Build systems that make it easy for members to exercise freedom and responsibility; ensure overall fairness by demanding accountability when needed.<br><br>Leveraging external stakeholders<br>Build deep trust with all external stakeholders and leverage their power for company growth.">自由と責任の促進。Leveraging external stakeholders（社外ステークホルダーの力を使う）。</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION: Const/Energy -->
+  <div class="section" data-team="const" id="section-const">
+    <div class="section-header">
+      <div class="section-icon" style="background:var(--gold);">C</div>
+      <div class="section-title" id="st-const">Const / Energy チーム</div>
+      <div class="section-tag" id="stag-const">Const / Energy メンバーのみ</div>
+    </div>
+    <div id="comp-drawing" class="comp-table-wrap" data-team="const">
+      <div class="comp-table-header">
+        <div class="comp-name" data-ja="図面・製品知識" data-en="Drawing & Product Knowledge">図面・製品知識</div>
+        <div class="comp-group-tag const" data-ja="Const / Energy" data-en="Const / Energy">Const / Energy</div>
+      </div>
+      <div class="jl-grid">
+        <div class="jl-col" data-jl="0"><div class="jl-col-header"><span class="jl-num jl0">JL 0</span></div><div class="jl-col-body" data-ja="図面理解<br>基本的な図面を読み解ける。CADを使って図面を書ける。" data-en="Drawing comprehension<br>Read basic drawings. Write drawings using CAD.">図面理解<br>基本的な図面を読み解ける。CADを使って図面を書ける。</div></div>
+        <div class="jl-col" data-jl="1"><div class="jl-col-header"><span class="jl-num jl1">JL 1</span></div><div class="jl-col-body" data-ja="自社製品の理解<br>MCオリジナル製品及び再販品について、他社製品と比較した特性を理解・説明できる。<br><br>原価相場理解 LV1<br>住宅における部材費・施工費の市場相場を深く理解している。<br><br>法規理解（設計）LV1<br>法22条地域など標準案件で求められる知識を持っている。" data-en="Company product knowledge<br>Understand and explain the characteristics of MC original and resale products compared to competitors.<br><br>Cost benchmark LV1<br>Deeply understand market benchmarks for residential material and construction costs.<br><br>Building code LV1<br>Have knowledge required for standard projects such as Article 22 zones.">自社製品の理解、原価相場理解 LV1、法規理解（設計）LV1</div></div>
+        <div class="jl-col" data-jl="2"><div class="jl-col-header"><span class="jl-num jl2">JL 2</span></div><div class="jl-col-body" data-ja="収まり・システム設計力 LV1<br>標準案件以外での複雑な納まりを設計できる。CADで難しい図面をスピーディに書ける。<br><br>原価相場理解 LV2<br>非住宅における部材費・施工費の相場を深く理解している。<br><br>設計意図理解<br>図面から設計者の意図を読み取り言語化できる。" data-en="Detailing/system design LV1<br>Design complex details beyond standard projects. Write complex drawings quickly in CAD.<br><br>Cost benchmark LV2<br>Deeply understand market benchmarks for non-residential costs.<br><br>Design intent comprehension<br>Read and verbalize designer's intent from drawings.">収まり・システム設計力 LV1、原価相場理解 LV2、設計意図理解</div></div>
+        <div class="jl-col" data-jl="3"><div class="jl-col-header"><span class="jl-num jl3">JL 3</span></div><div class="jl-col-body" data-ja="収まり・システム設計力 LV2<br>過去に事例のない複雑案件のシステム・納まり設計ができる。<br><br>法規理解（設計）LV2<br>非住宅・非標準案件のマイナーな法律上の制限を理解している。" data-en="Detailing/system design LV2<br>Design systems and detailing for complex projects with no prior precedent.<br><br>Building code LV2<br>Understand minor legal restrictions for non-residential and non-standard projects.">収まり・システム設計力 LV2、法規理解（設計）LV2</div></div>
+        <div class="jl-col" data-jl="4"><div class="jl-col-header"><span class="jl-num jl4">JL 4</span></div><div class="jl-col-body" data-ja="収まり・システム設計力 LV3<br>太陽光・建築・電気設備において学術的な知識を持ち、詳細な設計ができる。" data-en="Detailing/system design LV3<br>Have academic knowledge of solar, architecture, and electrical systems; capable of detailed design.">収まり・システム設計力 LV3<br>学術的な知識を持ち、詳細な設計ができる。</div></div>
+      </div>
+    </div>
+    <div id="comp-site" class="comp-table-wrap" data-team="const">
+      <div class="comp-table-header">
+        <div class="comp-name" data-ja="現場作業・工程管理" data-en="Site Work & Schedule Management">現場作業・工程管理</div>
+        <div class="comp-group-tag const" data-ja="Const / Energy" data-en="Const / Energy">Const / Energy</div>
+      </div>
+      <div class="jl-grid">
+        <div class="jl-col" data-jl="0"><div class="jl-col-header"><span class="jl-num jl0">JL 0</span></div><div class="jl-col-body" data-ja="工程表理解<br>工程表内のMC工事関連部分をよく理解している。<br><br>安全管理 LV1<br>自らの安全管理ができる。" data-en="Schedule comprehension<br>Understand MC work sections in construction schedules.<br><br>Safety management LV1<br>Manage own safety on site.">工程表理解、安全管理 LV1</div></div>
+        <div class="jl-col" data-jl="1"><div class="jl-col-header"><span class="jl-num jl1">JL 1</span></div><div class="jl-col-body" data-ja="施工方法・トラブル対応方法の理解<br>職人に指導できる程度に理解している（標準案件レベル）。<br><br>安全管理 LV2<br>施工ベンダーの安全管理ができる。<br><br>現場作業（作業者）<br>自ら手を動かして現場作業ができる。" data-en="Construction methods &amp; troubleshooting<br>Understand well enough to instruct workers (standard project level).<br><br>Safety management LV2<br>Manage safety of construction vendors.<br><br>Site work (worker)<br>Can perform hands-on site work personally.">施工方法・トラブル対応の理解、安全管理 LV2、現場作業（作業者）</div></div>
+        <div class="jl-col" data-jl="2"><div class="jl-col-header"><span class="jl-num jl2">JL 2</span></div><div class="jl-col-body" data-ja="他工種理解・工程表作成 LV1<br>他工種の段取りを理解しており、他工種に配慮した施工計画を組める。<br><br>現場作業（管理者）<br>現場で作業指示を適切に出し、作業者が初心者でも標準時間で作業を終わらせられる。" data-en="Other trades &amp; scheduling LV1<br>Understand other trades' preparation and create construction plans that consider them.<br><br>Site work (manager)<br>Give appropriate on-site instructions so even novice workers finish in standard time.">他工種理解・工程表作成 LV1、現場作業（管理者）</div></div>
+        <div class="jl-col" data-jl="3"><div class="jl-col-header"><span class="jl-num jl3">JL 3</span></div><div class="jl-col-body" data-ja="ゼネコン・サブコン理解<br>ゼネコン・サブコンの現場管理方法や必要書類を熟知しており、MCが下請けに入った際も時間をかけずに対応できる。<br><br>法規理解（進行管理）LV3<br>非住宅・非標準案件の施工管理に関わるマイナーな法律上の制限を理解している。" data-en="GC/Sub understanding<br>Know GC and subcontractor site management and required documents; can handle the subcontractor role quickly when MC is in that position.<br><br>Building code LV3<br>Understand minor legal restrictions related to construction management for non-residential and non-standard projects.">ゼネコン・サブコン理解、法規理解（進行管理）LV3</div></div>
+        <div class="jl-col" data-jl="4"><div class="jl-col-header"><span class="jl-num jl4">JL 4</span></div><div class="jl-col-body" data-ja="他工種理解・工程表作成 LV2<br>他工種の段取りや作業内容を熟知しており、全体工程に配慮した施工計画を組める。<br><br>元請けとして全体的な工程管理・予算管理ができる。" data-en="Other trades &amp; scheduling LV2<br>Know other trades' preparation and work content thoroughly; create construction plans considering the overall schedule.<br><br>Can manage overall schedule and budget as general contractor.">他工種理解・工程表作成 LV2、元請けとして全体的な工程・予算管理ができる。</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION: Dev Common -->
+  <div class="section" data-team="dev" id="section-dev">
+    <div class="section-header">
+      <div class="section-icon" style="background:var(--blue);">D</div>
+      <div class="section-title" id="st-dev">Dev — 共通（Engineer / Designer）</div>
+      <div class="section-tag" id="stag-dev">Dev team 全員</div>
+    </div>
+    <div id="comp-dev-comm" class="comp-table-wrap" data-team="dev">
+      <div class="comp-table-header">
+        <div class="comp-name" data-ja="Communication" data-en="Communication">Communication</div>
+        <div class="comp-group-tag dev" data-ja="Dev Common" data-en="Dev Common">Dev Common</div>
+      </div>
+      <div class="jl-grid">
+        <div class="jl-col" data-jl="0"><div class="jl-col-header"><span class="jl-num jl0">JL 0</span></div><div class="jl-col-body" data-ja="業務上のコミュニケーションを常に他の人が見える場所で行っている。定期的に仕事のアップデートを行い、判断の根拠を説明できる。" data-en="Always conduct work-related communication in visible places. Regularly provide work updates and explain the rationale behind decisions.">業務上のコミュニケーションを常に他の人が見える場所で行っている。判断の根拠を説明できる。</div></div>
+        <div class="jl-col" data-jl="1"><div class="jl-col-header"><span class="jl-num jl1">JL 1</span></div><div class="jl-col-body" data-ja="他者からの改善提案を受け止めることができる。自分は正しい・相手は間違っているという思い込みをしない。" data-en="Accept suggestions for improvement from others. Avoid the assumption that you are right and others are wrong.">他者からの改善提案を受け止めることができる。</div></div>
+        <div class="jl-col" data-jl="2"><div class="jl-col-header"><span class="jl-num jl2">JL 2</span></div><div class="jl-col-body" data-ja="ダイレクトな意見を相手が受け入れやすいように伝えられる。質の高い明瞭なドキュメントを書ける。同期・非同期コミュニケーションを使い分けられる。" data-en="Communicate direct opinions in a way that is easy for others to accept. Write high-quality, clear documentation. Balance synchronous and asynchronous communication.">ダイレクトな意見を受け入れやすく伝えられる。質の高いドキュメントを書ける。同期・非同期を使い分けられる。</div></div>
+        <div class="jl-col" data-jl="3"><div class="jl-col-header"><span class="jl-num jl3">JL 3</span></div><div class="jl-col-body" data-ja="職位が高めでも自分の意見に固執せず、他の人の話をきちんと最後まで聞き柔軟に対応できる。他人の意見を自ら収集できる。" data-en="Even in senior positions, don't cling to your own opinions; listen to others until the end and respond flexibly. Proactively seek out others' opinions.">職位が高めでも意見に固執せず、他人の話を最後まで聞き柔軟に対応できる。</div></div>
+        <div class="jl-col" data-jl="4"><div class="jl-col-header"><span class="jl-num jl4">JL 4</span></div><div class="jl-col-body" data-ja="チームやプロダクトのビジョン・戦略を自分の言葉で明瞭に説明できる。経営層とメンバー層の中間として、分断を防ぐ働きかけができる。優れたストーリーテラーとして、ビジョンをDevチームや会社全体に共感を持って示せる。" data-en="Clearly explain team/product vision and strategy in own words. As a bridge between management and members, work to prevent division. As an excellent storyteller, convey vision to Dev team and company with resonance.">ビジョン・戦略を自分の言葉で明瞭に説明できる。経営層とメンバー層の分断を防ぐ働きかけができる。</div></div>
+      </div>
+    </div>
+    <div id="comp-dev-initiative" class="comp-table-wrap" data-team="dev">
+      <div class="comp-table-header">
+        <div class="comp-name" data-ja="Initiative（主体性・実行力）" data-en="Initiative">Initiative（主体性・実行力）</div>
+        <div class="comp-group-tag dev" data-ja="Dev Common" data-en="Dev Common">Dev Common</div>
+      </div>
+      <div class="jl-grid">
+        <div class="jl-col" data-jl="0"><div class="jl-col-header"><span class="jl-num jl0">JL 0</span></div><div class="jl-col-body" data-ja="業務に関連する様々なことに興味を持ち、自発的に調べ・勉強できる。今は独力で完了困難なタスクにも挑戦できる。" data-en="Have interest in various work-related matters and proactively research and study. Challenge tasks that are currently difficult to complete independently.">業務に関連することに興味を持ち、自発的に学べる。難しいタスクにも挑戦できる。</div></div>
+        <div class="jl-col" data-jl="1"><div class="jl-col-header"><span class="jl-num jl1">JL 1</span></div><div class="jl-col-body" data-ja="明示的に割り当てられたタスクを期限・品質の期待通りにクリアできる。早く終わった場合は他のタスクの割り当てを自ら依頼できる。" data-en="Complete explicitly assigned tasks on time and at expected quality. If finishing early, proactively request additional task assignments.">明示的に割り当てられたタスクを期限・品質通りにクリアできる。</div></div>
+        <div class="jl-col" data-jl="2"><div class="jl-col-header"><span class="jl-num jl2">JL 2</span></div><div class="jl-col-body" data-ja="プロジェクト完了に必要なタスクで、まだ明らかになっていないものを自ら考案・提案し、能動的に取り組んでいる。" data-en="Conceive, propose, and proactively work on tasks necessary for project completion that have not yet been identified.">プロジェクト完了に必要なタスクで未明確なものを自ら考案・提案し能動的に取り組んでいる。</div></div>
+        <div class="jl-col" data-jl="3"><div class="jl-col-header"><span class="jl-num jl3">JL 3</span></div><div class="jl-col-body" data-ja="プロジェクトの隠れたダウンサイド・アップサイドを明確にするため能動的に動き、成果最大化の努力をしている。重要な複雑性を持つ新しいタスクを提案し実装を支援できる。" data-en="Proactively clarify hidden downsides and upsides of projects, making efforts to maximize outcomes. Propose and help implement important new tasks with significant complexity.">プロジェクトのダウンサイド・アップサイドを明確にし成果を最大化。重要な新タスクを提案できる。</div></div>
+        <div class="jl-col" data-jl="4"><div class="jl-col-header"><span class="jl-num jl4">JL 4</span></div><div class="jl-col-body" data-ja="独創的・新しいアイデアを一貫して提案・実行し、会社を重要な革新や競争上の優位性へと導ける。技術領域に閉じることなく、事業・会社全体の全体最適のためにアイディアを出し行動し成果を発揮できる。" data-en="Consistently propose and implement original and new ideas that lead the company to significant innovation or competitive advantage. Think beyond technical domains to generate ideas, act, and deliver results for overall business optimization.">独創的なアイデアを一貫して提案・実行し、会社を重要な革新へと導ける。事業全体最適のために行動できる。</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION: Engineer -->
+  <div class="section" data-team="dev" id="section-engineer">
+    <div class="section-header">
+      <div class="section-icon" style="background:#0C447C;">E</div>
+      <div class="section-title" id="st-eng">Engineer 専用</div>
+      <div class="section-tag" id="stag-eng">Engineer のみ</div>
+    </div>
+    <div id="comp-eng-breadth" class="comp-table-wrap" data-team="dev">
+      <div class="comp-table-header">
+        <div class="comp-name" data-ja="Breadth of Engineering Expertise（技術の幅）" data-en="Breadth of Engineering Expertise">Breadth of Engineering Expertise（技術の幅）</div>
+        <div class="comp-group-tag dev">Engineer</div>
+      </div>
+      <div class="jl-grid">
+        <div class="jl-col" data-jl="0"><div class="jl-col-header"><span class="jl-num jl0">JL 0</span></div><div class="jl-col-body" data-ja="技術的な専門知識の幅を積極的に発展させている。" data-en="Actively working to expand the breadth of technical expertise.">技術的な専門知識の幅を積極的に発展させている。</div></div>
+        <div class="jl-col" data-jl="1"><div class="jl-col-header"><span class="jl-num jl1">JL 1</span></div><div class="jl-col-body" data-ja="技術的な専門知識の幅は発展途上で、担当領域でも一部完遂が難しいことがある。（例：バックエンドAPIは作れるがDB設計はまだ難しい）" data-en="Technical breadth is still developing; some tasks in the assigned project area may still be difficult. (e.g., can build backend APIs but database design is still challenging)">技術的な専門知識の幅は発展途上。担当領域でも一部完遂が難しいことがある。</div></div>
+        <div class="jl-col" data-jl="2"><div class="jl-col-header"><span class="jl-num jl2">JL 2</span></div><div class="jl-col-body" data-ja="技術的な専門知識の幅が、担当するプロジェクトの1領域（フロントエンド・バックエンド・インフラなど）すべてをカバーしている。プロジェクトのいろいろなタスクをこなせる。" data-en="Technical breadth covers all of the one assigned domain (frontend, backend, infra, etc.). Can handle various tasks within the project.">技術的な専門知識の幅が担当する1領域すべてをカバーしている。プロジェクトのいろいろなタスクをこなせる。</div></div>
+        <div class="jl-col" data-jl="3"><div class="jl-col-header"><span class="jl-num jl3">JL 3</span></div><div class="jl-col-body" data-ja="技術的領域の幅が1人が通常担当する1領域を越えており、プロジェクト全体で効果的な技術的アプローチに貢献できる。" data-en="Technical breadth exceeds the single area one person normally covers; can contribute to effective technical approaches across the entire project.">技術的領域の幅が1領域を越えており、プロジェクト全体で効果的な技術的アプローチに貢献できる。</div></div>
+        <div class="jl-col" data-jl="4"><div class="jl-col-header"><span class="jl-num jl4">JL 4</span></div><div class="jl-col-body" data-ja="複数技術領域を横断し、技術的イノベーションを推進できる。複数技術領域を戦略的に統合し組織・業界に新たな価値を創出できる。（例：マイクロサービスとエッジコンピューティングを組み合わせた新規プラットフォーム開発）" data-en="Can drive technological innovation across multiple technical domains. Strategically integrate multiple technical domains to create new value for organizations and industries. (e.g., new platform development combining microservices and edge computing)">複数技術領域を横断しイノベーションを推進。戦略的に統合し組織・業界に新たな価値を創出できる。</div></div>
+      </div>
+    </div>
+    <div id="comp-eng-depth" class="comp-table-wrap" data-team="dev">
+      <div class="comp-table-header">
+        <div class="comp-name" data-ja="Depth of Engineering Expertise（技術の深さ）" data-en="Depth of Engineering Expertise">Depth of Engineering Expertise（技術の深さ）</div>
+        <div class="comp-group-tag dev">Engineer</div>
+      </div>
+      <div class="jl-grid">
+        <div class="jl-col" data-jl="0"><div class="jl-col-header"><span class="jl-num jl0">JL 0</span></div><div class="jl-col-body" data-ja="技術的な専門知識の深さを意欲的に発展させている。努力が結果に反映されている。" data-en="Actively developing depth of technical expertise. Efforts are reflected in results.">技術的な専門知識の深さを意欲的に発展させている。</div></div>
+        <div class="jl-col" data-jl="1"><div class="jl-col-header"><span class="jl-num jl1">JL 1</span></div><div class="jl-col-body" data-ja="自分の専門分野の基本をよく理解し、その理解を活かして仕事を完遂できる。" data-en="Have a strong understanding of the fundamentals of your primary field and demonstrated ability to complete work using that understanding.">自分の専門分野の基本をよく理解し、それを活かして仕事を完遂できる。</div></div>
+        <div class="jl-col" data-jl="2"><div class="jl-col-header"><span class="jl-num jl2">JL 2</span></div><div class="jl-col-body" data-ja="自分の専門分野について、微細で重要な詳細を含め、深い理解と経験を有している。" data-en="Have demonstrated deep understanding and experience in your primary field, including minute but critical details.">自分の専門分野について、微細で重要な詳細を含め、深い理解と経験を有している。</div></div>
+        <div class="jl-col" data-jl="3"><div class="jl-col-header"><span class="jl-num jl3">JL 3</span></div><div class="jl-col-body" data-ja="専門分野の基礎と詳細を深く理解し、他人では解決困難な技術的問題を粘り強く解決できる。" data-en="Deeply understand fundamentals and details of your field; persevere and solve tough technical problems that ordinary people cannot solve.">専門分野の基礎と詳細を深く理解し、他人では解決困難な技術的問題を粘り強く解決できる。</div></div>
+        <div class="jl-col" data-jl="4"><div class="jl-col-header"><span class="jl-num jl4">JL 4</span></div><div class="jl-col-body" data-ja="深い専門性で他社が追随困難な技術的課題を解決し、組織・社会にイノベーションをもたらしている。特定領域で独自の技術体系を確立し、業界のベストプラクティスや標準をリードしている。" data-en="Solve technical challenges that competitors cannot replicate through deep expertise, bringing innovation to organizations and society. Establish unique technical frameworks in specific domains and lead industry best practices and standards.">深い専門性で他社が追随困難な課題を解決。独自の技術体系を確立し業界標準をリードしている。</div></div>
+      </div>
+    </div>
+    <div id="comp-eng-quality" class="comp-table-wrap" data-team="dev">
+      <div class="comp-table-header">
+        <div class="comp-name" data-ja="Quality（品質）" data-en="Quality">Quality（品質）</div>
+        <div class="comp-group-tag dev">Engineer</div>
+      </div>
+      <div class="jl-grid">
+        <div class="jl-col" data-jl="0"><div class="jl-col-header"><span class="jl-num jl0">JL 0</span></div><div class="jl-col-body" data-ja="仕事の質を意欲的に向上させている。努力が結果に反映されている。" data-en="Actively improving the quality of work. Efforts are reflected in results.">仕事の質を意欲的に向上させている。</div></div>
+        <div class="jl-col" data-jl="1"><div class="jl-col-header"><span class="jl-num jl1">JL 1</span></div><div class="jl-col-body" data-ja="仕事の質は十分で、検証・テストに相応の時間を費やしている。（時折、重大なミスやバグを犯すことはある）" data-en="Work quality is satisfactory; spends reasonable time on verification and testing. (Occasional significant mistakes or bugs may occur)">仕事の質は十分で、検証・テストに相応の時間を費やしている。</div></div>
+        <div class="jl-col" data-jl="2"><div class="jl-col-header"><span class="jl-num jl2">JL 2</span></div><div class="jl-col-body" data-ja="仕事の質は非常に良く、適切な時間で検証・テスト・文書化している。RASIS（信頼性・可用性・保守性・保全性・安全性）をよく理解し、アンチパターンを避けられる。" data-en="Very good work quality; appropriate time for verification, testing, and documentation. Understands RASIS (Reliability, Availability, Serviceability, Integrity, Security) and avoids anti-patterns.">仕事の質は非常に良く、RASISをよく理解しアンチパターンを避けられる。</div></div>
+        <div class="jl-col" data-jl="3"><div class="jl-col-header"><span class="jl-num jl3">JL 3</span></div><div class="jl-col-body" data-ja="仕事の質は非常に高く、プロジェクト開始時に気づかれなかったエッジケースへの対応もきちんと行われており、当初想定以上の品質のプロダクトを作成できる。RASISを実践的に理解しており、ユーザー急増等による品質・性能・安全性の低下を未然に防げる。" data-en="Very high work quality; properly addresses edge cases not noticed at project start, creating products that exceed initial quality expectations. Practically understands RASIS and can prevent degradation in quality, performance, and security from sudden user surges.">非常に高い品質。エッジケースも対応し当初想定以上のプロダクトを作れる。RASISを実践的に理解している。</div></div>
+        <div class="jl-col" data-jl="4"><div class="jl-col-header"><span class="jl-num jl4">JL 4</span></div><div class="jl-col-body" data-ja="エンドユーザーにとっての品質やセキュリティ品質等を常に監視し、継続的な品質向上に取り組んでいる。チームとして品質向上に取り組ませるための働きかけやチーム運用ができている。" data-en="Constantly monitor quality for end users and security quality; work on continuous quality improvement. Can motivate team-wide quality improvement efforts and manage team operations toward this goal.">エンドユーザーの品質・セキュリティを常に監視し継続的に改善。チームとして品質向上に取り組める。</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION: Designer -->
+  <div class="section" data-team="dev" id="section-designer">
+    <div class="section-header">
+      <div class="section-icon" style="background:#534AB7;">Ds</div>
+      <div class="section-title" id="st-des">Designer 専用</div>
+      <div class="section-tag" id="stag-des">Designer のみ</div>
+    </div>
+    <div id="comp-des-breadth" class="comp-table-wrap" data-team="dev">
+      <div class="comp-table-header">
+        <div class="comp-name" data-ja="Breadth of Design Expertise（デザインの幅）" data-en="Breadth of Design Expertise">Breadth of Design Expertise（デザインの幅）</div>
+        <div class="comp-group-tag dev">Designer</div>
+      </div>
+      <div class="jl-grid">
+        <div class="jl-col" data-jl="0"><div class="jl-col-header"><span class="jl-num jl0">JL 0</span></div><div class="jl-col-body" data-ja="複数領域への関心と学習意欲を持ち、積極的に新たな領域の知識や経験を広げている。（例：異なる分野のプロジェクトや学習機会に積極的に参加）" data-en="Have interest and eagerness to learn about multiple domains; actively expanding knowledge and experience in new areas. (e.g., actively participating in projects and learning opportunities in different fields)">複数領域への関心と学習意欲を持ち、積極的に新たな領域の知識や経験を広げている。</div></div>
+        <div class="jl-col" data-jl="1"><div class="jl-col-header"><span class="jl-num jl1">JL 1</span></div><div class="jl-col-body" data-ja="複数の領域で基礎的な知識・スキルを持ち、チームやプロジェクトにおいて多面的な視点で貢献できる。（例：自分の得意分野に加え、他領域の業務にもサポートとして関与する）" data-en="Have basic knowledge and skills in multiple areas; contribute from multiple perspectives in teams and projects. (e.g., supporting work in other domains in addition to areas of expertise)">複数の領域で基礎的な知識・スキルを持ち、多面的な視点で貢献できる。</div></div>
+        <div class="jl-col" data-jl="2"><div class="jl-col-header"><span class="jl-num jl2">JL 2</span></div><div class="jl-col-body" data-ja="担当領域においては実務レベルで十分な知識・スキルを持ち、隣接する複数領域にも対応できる柔軟性を持つ。必要に応じて領域間の調整・連携を図れる。" data-en="Possess sufficient knowledge and skills at a practical level in assigned areas; have flexibility to handle multiple adjacent areas. Can coordinate and collaborate across domains as needed.">担当領域で十分なスキルを持ち、隣接領域にも対応できる柔軟性がある。</div></div>
+        <div class="jl-col" data-jl="3"><div class="jl-col-header"><span class="jl-num jl3">JL 3</span></div><div class="jl-col-body" data-ja="複数のデザイン領域で高い専門性を発揮し、領域間の連携や新規領域への挑戦を通じてプロジェクトの成果や組織の幅を拡張している。" data-en="Demonstrate high expertise in multiple design fields; expand project outcomes and organizational breadth through interdisciplinary collaboration and new domain challenges.">複数のデザイン領域で高い専門性を発揮し、プロジェクトの成果や組織の幅を拡張している。</div></div>
+        <div class="jl-col" data-jl="4"><div class="jl-col-header"><span class="jl-num jl4">JL 4</span></div><div class="jl-col-body" data-ja="社内外の複数領域を横断し、領域間の連携や知識の橋渡しによってチームやプロジェクトに新たな視点や価値をもたらしている。多様なデザイン領域を戦略的に統合し、組織やプロダクトに革新的な価値をもたらしている。" data-en="Cross multiple domains inside and outside the organization; bring new perspectives and value through interdisciplinary collaboration and knowledge bridging. Strategically integrate diverse design disciplines to bring innovative value to organizations and products.">社内外の複数領域を横断し、新たな視点や価値をもたらしている。多様な領域を戦略的に統合し革新的な価値を創出。</div></div>
+      </div>
+    </div>
+    <div id="comp-des-depth" class="comp-table-wrap" data-team="dev">
+      <div class="comp-table-header">
+        <div class="comp-name" data-ja="Depth of Design Expertise（デザインの深さ）" data-en="Depth of Design Expertise">Depth of Design Expertise（デザインの深さ）</div>
+        <div class="comp-group-tag dev">Designer</div>
+      </div>
+      <div class="jl-grid">
+        <div class="jl-col" data-jl="0"><div class="jl-col-header"><span class="jl-num jl0">JL 0</span></div><div class="jl-col-body" data-ja="特定領域での専門性を高めるために、積極的に学習や実践を行っている段階。（例：専門領域の基礎知識や技術の習得に取り組んでいる）" data-en="Actively learning and practicing to enhance expertise in specific domains. (e.g., working on acquiring basic knowledge and skills in specialized fields)">特定領域での専門性を高めるために、積極的に学習や実践を行っている段階。</div></div>
+        <div class="jl-col" data-jl="1"><div class="jl-col-header"><span class="jl-num jl1">JL 1</span></div><div class="jl-col-body" data-ja="特定領域で基礎的な知識・スキルを有し、業務や課題に独力で対応できる。（例：専門領域の基本的な業務を自立して遂行）" data-en="Have basic knowledge and skills in specific domains and can independently handle tasks. (e.g., independently performing basic duties in specialized fields)">特定領域で基礎的な知識・スキルを有し、業務や課題に独力で対応できる。</div></div>
+        <div class="jl-col" data-jl="2"><div class="jl-col-header"><span class="jl-num jl2">JL 2</span></div><div class="jl-col-body" data-ja="担当領域で十分な専門性を持ち、実践的な難易度の課題やプロジェクトを自律して遂行できる。" data-en="Have sufficient expertise in assigned domains and can autonomously execute challenging tasks and projects.">担当領域で十分な専門性を持ち、実践的な難易度のプロジェクトを自律して遂行できる。</div></div>
+        <div class="jl-col" data-jl="3"><div class="jl-col-header"><span class="jl-num jl3">JL 3</span></div><div class="jl-col-body" data-ja="特定領域で他者が容易に到達できないレベルの知識・スキルを持ち、プロジェクトや組織の中核となる課題解決に貢献している。" data-en="Have knowledge and skills at levels not easily attainable by others; contribute to core problem-solving in projects and organizations.">特定領域で他者が容易に到達できないレベルの知識・スキルを持ち、中核となる課題解決に貢献している。</div></div>
+        <div class="jl-col" data-jl="4"><div class="jl-col-header"><span class="jl-num jl4">JL 4</span></div><div class="jl-col-body" data-ja="特定領域で高度な専門性を有し、継続的な探究・深化によって組織やプロダクトに持続的な競争優位をもたらしている。特定領域で業界をリードする独自の知識体系や技術を構築し、組織や業界のスタンダードを変革している。" data-en="Possess advanced expertise in specific domains; bring sustainable competitive advantage through continuous exploration and deepening. Establish industry-leading unique knowledge systems and transform organizational and industry standards.">高度な専門性で持続的な競争優位をもたらしている。業界をリードする独自の知識体系を構築し標準を変革している。</div></div>
+      </div>
+    </div>
+    <div id="comp-des-direction" class="comp-table-wrap" data-team="dev">
+      <div class="comp-table-header">
+        <div class="comp-name" data-ja="Direction / Collaboration" data-en="Direction / Collaboration">Direction / Collaboration</div>
+        <div class="comp-group-tag dev">Designer</div>
+      </div>
+      <div class="jl-grid">
+        <div class="jl-col" data-jl="0"><div class="jl-col-header"><span class="jl-num jl0">JL 0</span></div><div class="jl-col-body" data-ja="[Collaboration] チーム内での役割を理解し、自分が貢献できる領域に積極的に働きかけることができる。" data-en="[Collaboration] Understand their role within the team and can proactively contribute in areas where they can add value.">[Collaboration] チーム内での役割を理解し、自分が貢献できる領域に積極的に働きかけることができる。</div></div>
+        <div class="jl-col" data-jl="1"><div class="jl-col-header"><span class="jl-num jl1">JL 1</span></div><div class="jl-col-body" data-ja="[Collaboration] チーム内で自律して仕事を行い、他のメンバーを助ける動きを取れる。ユーザーや他メンバーからのFBを真摯に受け止め、改善できる。" data-en="[Collaboration] Work autonomously within the team and take actions to assist other members. Sincerely accept feedback from users and team members and make improvements.">[Collaboration] チーム内で自律して仕事を行い、他メンバーを助ける動きを取れる。</div></div>
+        <div class="jl-col" data-jl="2"><div class="jl-col-header"><span class="jl-num jl2">JL 2</span></div><div class="jl-col-body" data-ja="[Collaboration] 抽象的な仕事依頼を受け、具現化できる。具体化の過程で必要なFBを社内外から積極的に受け取れる。他デザイナーの成果に建設的なFBができる。" data-en="[Collaboration] Receive abstract work requests and transform them into concrete deliverables. Actively gather necessary feedback from internal and external sources. Provide constructive feedback on other designers' work.">[Collaboration] 抽象的な仕事依頼を具現化できる。他デザイナーの成果に建設的なFBができる。</div></div>
+        <div class="jl-col" data-jl="3"><div class="jl-col-header"><span class="jl-num jl3">JL 3</span></div><div class="jl-col-body" data-ja="[Direction] 外部のベンダー・デザイナー・制作会社・パートナーと協力して製品を作り上げられる。交渉や検収作業などを自律して行える。<br><br>プロダクト全体の体験を振り返り、あるべき姿を考案できる。そのために必要なプロジェクトの立ち上げをリードできる。" data-en="[Direction] Collaborate with external vendors, designers, production companies, and partners to create products. Autonomously handle negotiations and acceptance processes.<br><br>Review the experience across the entire product and conceptualize the ideal state. Lead the initialization of necessary projects to achieve this vision.">[Direction] 外部パートナーと協力して製品を作り上げられる。プロダクト全体のあるべき姿を考案しプロジェクトをリードできる。</div></div>
+        <div class="jl-col" data-jl="4"><div class="jl-col-header"><span class="jl-num jl4">JL 4</span></div><div class="jl-col-body" data-ja="[Direction] 複数の製品・サービスを横串でみて、すべての体験がシームレスにつながるために必要なこと（機能・製品・改善など）を起案でき、完了まで責任を負える。" data-en="[Direction] Propose and take responsibility for what is needed (features, products, improvements, etc.) to ensure seamless connection of experiences across multiple products and services, and be accountable until completion.">[Direction] 複数の製品・サービスを横串でみて、シームレスな体験に必要なことを起案でき、完了まで責任を負える。</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION: Dev Manager -->
+  <div class="section" data-team="devmgr" id="section-devmgr">
+    <div class="section-header">
+      <div class="section-icon" style="background:#3C3489;">M</div>
+      <div class="section-title" id="st-devmgr">Dev Manager 専用</div>
+      <div class="section-tag" id="stag-devmgr">Dev Manager のみ / JL2〜</div>
+    </div>
+    <div id="comp-devmgr-product" class="comp-table-wrap" data-team="devmgr">
+      <div class="comp-table-header">
+        <div class="comp-name" data-ja="Product Management" data-en="Product Management">Product Management</div>
+        <div class="comp-group-tag dev" data-ja="Dev Manager" data-en="Dev Manager">Dev Manager</div>
+      </div>
+      <div class="jl-grid">
+        <div class="jl-col" data-jl="0"><div class="jl-col-header"><span class="jl-num jl0">JL 0</span></div><div class="jl-col-body"><span class="empty">—</span></div></div>
+        <div class="jl-col" data-jl="1"><div class="jl-col-header"><span class="jl-num jl1">JL 1</span></div><div class="jl-col-body"><span class="empty">—</span></div></div>
+        <div class="jl-col" data-jl="2"><div class="jl-col-header"><span class="jl-num jl2">JL 2</span></div><div class="jl-col-body" data-ja="一般的な技術的な理解、担当プロダクトの技術的詳細、プロダクトマネジメントについての知識・経験を意欲的に発展させている。担当プロダクトに関する自分なりの改善案やビジョンを持っている。" data-en="Actively developing general technical understanding, product technical details, and product management skills. Have own improvement plans and vision for the product.">一般的な技術的な理解とプロダクトマネジメントの知識・経験を意欲的に発展させている。担当プロダクトのビジョンを持っている。</div></div>
+        <div class="jl-col" data-jl="3"><div class="jl-col-header"><span class="jl-num jl3">JL 3</span></div><div class="jl-col-body" data-ja="一般的なWebシステムやIoTシステムの詳細を理解している。担当プロダクトの技術的詳細・技術的負債・プロトコル上の制限をよく理解している。エンドユーザーの要望を継続的に調査しており、自分なりのプロダクトビジョンを描ける。" data-en="Understand details of general web and IoT systems. Have a firm grasp of technical details, technical debt, and protocol limitations of responsible products. Continuously research end-user needs and can shape own product vision.">WebシステムやIoTシステムの詳細を理解。担当プロダクトの技術的負債や制限を熟知し、自分なりのプロダクトビジョンを描ける。</div></div>
+        <div class="jl-col" data-jl="4"><div class="jl-col-header"><span class="jl-num jl4">JL 4</span></div><div class="jl-col-body" data-ja="成長したプロダクトに数ヶ月〜数年で発生する事業的・技術的課題の両面に事前にアプローチできる高い視野を持っている。現実的なトレードオフをよく理解し、短期・長期の成果の両方を追求できる。自社製品の競合優位性を継続的に伸ばし、他社にないアイディアを実現できる。" data-en="Have high-level foresight to proactively address both business and technical challenges that arise in growing products. Understand practical trade-offs and can pursue both short-term and long-term outcomes. Continuously expand competitive advantage and realize ideas competitors don't have.">事業的・技術的課題の両面に事前にアプローチできる高い視野。短期・長期の成果を追求し、競合優位性を継続的に伸ばせる。</div></div>
+      </div>
+    </div>
+    <div id="comp-devmgr-project" class="comp-table-wrap" data-team="devmgr">
+      <div class="comp-table-header">
+        <div class="comp-name" data-ja="Project Management" data-en="Project Management">Project Management</div>
+        <div class="comp-group-tag dev" data-ja="Dev Manager" data-en="Dev Manager">Dev Manager</div>
+      </div>
+      <div class="jl-grid">
+        <div class="jl-col" data-jl="0"><div class="jl-col-header"><span class="jl-num jl0">JL 0</span></div><div class="jl-col-body"><span class="empty">—</span></div></div>
+        <div class="jl-col" data-jl="1"><div class="jl-col-header"><span class="jl-num jl1">JL 1</span></div><div class="jl-col-body"><span class="empty">—</span></div></div>
+        <div class="jl-col" data-jl="2"><div class="jl-col-header"><span class="jl-num jl2">JL 2</span></div><div class="jl-col-body" data-ja="メンバーの協力を得ながら現実的なタイムラインを引ける。技術的な詳細の理解に努め、独力でタイムラインを引くことに積極的である。" data-en="Set realistic timelines with team members' cooperation. Work to deepen understanding of technical details and proactively drive independent timeline planning.">メンバーの協力を得ながら現実的なタイムラインを引ける。独力でのタイムライン作成に積極的である。</div></div>
+        <div class="jl-col" data-jl="3"><div class="jl-col-header"><span class="jl-num jl3">JL 3</span></div><div class="jl-col-body" data-ja="自分のプロダクトビジョンに対して現実的なタイムラインを引ける。技術的な詳細は基本的に理解しているが、メンバーからの助言も活用してよりよいタイムマネジメントができる。" data-en="Establish realistic timelines aligned with product vision. Generally understand technical details, but also leverage team advice for better time management.">プロダクトビジョンに対して現実的なタイムラインを引ける。技術的詳細を理解しながらメンバーの助言も活かせる。</div></div>
+        <div class="jl-col" data-jl="4"><div class="jl-col-header"><span class="jl-num jl4">JL 4</span></div><div class="jl-col-body" data-ja="複数のプロジェクト（複数人のPjM）を効果的にマネジメントでき、ダウンサイドリスク（遅延・チームの疲弊・品質低下）を最小化できる。" data-en="Effectively manage multiple projects (each with own Project Manager) and minimize downside risks such as delays, team burnout, and quality degradation.">複数のプロジェクトを効果的にマネジメントでき、遅延・チームの疲弊・品質低下などのリスクを最小化できる。</div></div>
+      </div>
+    </div>
+    <div id="comp-devmgr-people" class="comp-table-wrap" data-team="devmgr">
+      <div class="comp-table-header">
+        <div class="comp-name" data-ja="People Management / Hiring" data-en="People Management / Hiring">People Management / Hiring</div>
+        <div class="comp-group-tag dev" data-ja="Dev Manager" data-en="Dev Manager">Dev Manager</div>
+      </div>
+      <div class="jl-grid">
+        <div class="jl-col" data-jl="0"><div class="jl-col-header"><span class="jl-num jl0">JL 0</span></div><div class="jl-col-body"><span class="empty">—</span></div></div>
+        <div class="jl-col" data-jl="1"><div class="jl-col-header"><span class="jl-num jl1">JL 1</span></div><div class="jl-col-body"><span class="empty">—</span></div></div>
+        <div class="jl-col" data-jl="2"><div class="jl-col-header"><span class="jl-num jl2">JL 2</span></div><div class="jl-col-body" data-ja="メンバーと定期的なコミュニケーションを取り信頼関係を構築できる。基本的なHiringのフロー・面接のdos and don'tsを理解している。技術者の技術力を口頭・コーディングテストで評価できる。" data-en="Build trust with team members through regular communication. Understand basic hiring flow and interview dos/don'ts. Evaluate technical candidates' skills through verbal interviews and coding tests.">メンバーと信頼関係を構築できる。Hiringのフローを理解し、技術力を口頭・コーディングテストで評価できる。</div></div>
+        <div class="jl-col" data-jl="3"><div class="jl-col-header"><span class="jl-num jl3">JL 3</span></div><div class="jl-col-body" data-ja="メンバーと信頼関係を構築しキャリアパスをともに描ける。メンバーに適切な粒度で仕事を任せ、成長を促し、チーム全体を強くできる。チームの採用計画に従って採用活動を行え、Hiringの見極めの精度を継続的に改善している。" data-en="Build trust and co-create career paths with members. Delegate work at appropriate granularity, promote growth, and strengthen the team. Conduct hiring per team plan and continuously improve evaluation accuracy.">キャリアパスをともに描ける。適切な粒度で仕事を任せチーム全体を強くできる。採用精度を継続的に改善している。</div></div>
+        <div class="jl-col" data-jl="4"><div class="jl-col-header"><span class="jl-num jl4">JL 4</span></div><div class="jl-col-body" data-ja="複数人のManagerと信頼関係を築き、全体で成長する方法を考え実行できる。チームの採用計画を立て実行できる。Hiringの母数を増やすための対外施策を打ち出しメンバーを巻き込める。事業の成長ドライバーとなる重要人物の採用に携わり、長期的な関係構築・クロージングができる。数年にわたって運用できる組織体制を計画しつつ、実際には柔軟な運用を行うスキルを有している。" data-en="Build trust with multiple managers and plan/execute ways to grow as a whole. Develop and execute team hiring plans. Launch external initiatives to expand hiring pool. Recruit key people who drive business growth with long-term relationship building. Plan organizational structures that operate over multiple years while maintaining flexible operations.">複数のManagerと信頼関係を築ける。採用計画を立て実行できる。重要人物の採用に携わり、数年単位の組織体制を計画できる。</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION: Supervisor -->
+  <div class="section" data-team="sv" id="section-sv">
+    <div class="section-header">
+      <div class="section-icon" style="background:#993556;">S</div>
+      <div class="section-title" id="st-sv">Supervisor / Manager</div>
+      <div class="section-tag" id="stag-sv">Supervisorのみ</div>
+    </div>
+    <div id="comp-people" class="comp-table-wrap" data-team="sv">
+      <div class="comp-table-header">
+        <div class="comp-name" data-ja="People Management / Hiring" data-en="People Management / Hiring">People Management / Hiring</div>
+        <div class="comp-group-tag sv" data-ja="Supervisor" data-en="Supervisor">Supervisor</div>
+      </div>
+      <div class="jl-grid">
+        <div class="jl-col" data-jl="0"><div class="jl-col-header"><span class="jl-num jl0">JL 0</span></div><div class="jl-col-body"><span class="empty">—</span></div></div>
+        <div class="jl-col" data-jl="1"><div class="jl-col-header"><span class="jl-num jl1">JL 1</span></div><div class="jl-col-body"><span class="empty">—</span></div></div>
+        <div class="jl-col" data-jl="2"><div class="jl-col-header"><span class="jl-num jl2">JL 2</span></div><div class="jl-col-body"><span class="empty">—</span></div></div>
+        <div class="jl-col" data-jl="3"><div class="jl-col-header"><span class="jl-num jl3">JL 3</span></div>
+          <div class="jl-col-body" data-ja="Goal setting for members<br><br>自らのゴールをチームメンバー個々のゴールにBreakdownし、目標設定を支援できる。ビジョンや仕事の目的・意味を伝え、意欲を高められる。<br><br>Career goals<br>チームメンバーの3〜5年先のキャリアゴールを理解しており、それに応じたアサインメント・FBを行う。" data-en="Goal setting for members<br><br>Break down own goals into individual member goals and support their target setting. Convey vision and purpose of work to motivate members.<br><br>Career goals<br>Understand team members' 3-5 year career goals and provide assignments and feedback accordingly.">Goal setting for members<br><br>自らのゴールをチームメンバー個々のゴールにBreakdownし、目標設定を支援できる。Career goals — チームメンバーのキャリアゴールを理解し、それに応じたFBを行う。</div></div>
+        <div class="jl-col" data-jl="4"><div class="jl-col-header"><span class="jl-num jl4">JL 4</span></div>
+          <div class="jl-col-body" data-ja="Goal Setting / Business Planning<br>リソース・コストを勘案して年間・四半期の事業計画を立案し、チーム全体のゴール・KPIを設定できる。<br><br>Hire & Develop the Best<br>組織の内外から会社の競争力を決定づけるキーパーソンを発掘・引き上げることで、組織全体の強化を行う。" data-en="Goal Setting / Business Planning<br>Plan annual and quarterly business plans considering resources and costs; set team goals and KPIs.<br><br>Hire &amp; Develop the Best<br>Identify and elevate key people from inside and outside the organization who determine the company's competitive advantage, strengthening the overall organization.">Goal Setting / Business Planning — 年間・四半期の事業計画を立案しKPIを設定できる。<br><br>Hire & Develop the Best — キーパーソンを発掘・引き上げ組織全体を強化する。</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let lang = localStorage.getItem('mc_lang') || 'ja';
+let activeTeam = 'all';
+let activeJL = 'all';
+
+const CT = {
+  ja: {
+    headerSub: '各Job Levelで期待されるコンピテンシーの定義一覧',
+    backLink: '← 評価ツールに戻る',
+    filterTeam: 'Team',
+    sgHeader: 'スコアの定義 / Score Definition',
+    scoreDefs: [
+      { num: '1', key: '未達', desc: '現在のJLの期待を満たしていない。前のレベルで評価されるべき状態。' },
+      { num: '2', key: '部分達成', desc: '現在のJLのCompetencyを部分的に満たしている。' },
+      { num: '3', key: '達成', desc: '現在のJLの期待通りに満たしている。' },
+      { num: '4', key: '超過達成', desc: '次のJLの行動を一部発揮している。現在のレベルを超えた状態。' },
+    ],
+    sections: {
+      common: { title: '全員共通 / All Members', tag: 'IC / PM 共通' },
+      const: { title: 'Const / Energy チーム', tag: 'Const / Energy メンバーのみ' },
+      dev: { title: 'Dev — 共通（Engineer / Designer）', tag: 'Dev team 全員' },
+      eng: { title: 'Engineer 専用', tag: 'Engineer のみ' },
+      des: { title: 'Designer 専用', tag: 'Designer のみ' },
+      devmgr: { title: 'Dev Manager 専用', tag: 'Dev Manager のみ / JL2〜' },
+      sv: { title: 'Supervisor / Manager', tag: 'Supervisorのみ' },
+    }
+  },
+  en: {
+    headerSub: 'Competency definitions by Job Level',
+    backLink: '← Back to Evaluation Tool',
+    filterTeam: 'Team',
+    sgHeader: 'Score Definition',
+    scoreDefs: [
+      { num: '1', key: 'Below', desc: "Does not meet current JL expectations. Should be evaluated at the previous level." },
+      { num: '2', key: 'Partial', desc: 'Partially meets the Competency expectations of the current JL.' },
+      { num: '3', key: 'Meets', desc: 'Meets the expectations of the current JL as expected.' },
+      { num: '4', key: 'Exceeds', desc: 'Demonstrating some behaviors of the next JL. Exceeding current level.' },
+    ],
+    sections: {
+      common: { title: 'All Members', tag: 'IC / PM common' },
+      const: { title: 'Const / Energy Team', tag: 'Const / Energy only' },
+      dev: { title: 'Dev — Common (Engineer / Designer)', tag: 'All Dev team members' },
+      eng: { title: 'Engineer Only', tag: 'Engineer only' },
+      des: { title: 'Designer Only', tag: 'Designer only' },
+      devmgr: { title: 'Dev Manager Only', tag: 'Dev Manager only / JL2+' },
+      sv: { title: 'Supervisor / Manager', tag: 'Supervisor only' },
+    }
+  }
+};
+
+function setLang(l) {
+  lang = l;
+  localStorage.setItem('mc_lang', lang);
+  ['ja','en'].forEach(x => { const el = document.getElementById('hl-'+x); if(el) el.classList.toggle('active', x===l); });
+  const S = CT[lang];
+  document.getElementById('header-sub').textContent = S.headerSub;
+  document.getElementById('back-link').textContent = S.backLink;
+  document.getElementById('sg-header').textContent = S.sgHeader;
+  document.getElementById('score-guide-grid').innerHTML = S.scoreDefs.map((d, i) => {
+    const nums = ['s1','s2','s3','s4'];
+    return `<div class="score-guide-item"><div class="score-num ${nums[i]}">${d.num}</div><div class="score-key ${nums[i]}">${d.key}</div><div class="score-desc">${d.desc}</div></div>`;
+  }).join('');
+  const sec = S.sections;
+  [['common','st-common','stag-common'],['const','st-const','stag-const'],['dev','st-dev','stag-dev'],
+   ['eng','st-eng','stag-eng'],['des','st-des','stag-des'],['devmgr','st-devmgr','stag-devmgr'],['sv','st-sv','stag-sv']].forEach(([key,tid,tagid]) => {
+    if (sec[key]) {
+      const te = document.getElementById(tid); if(te) te.textContent = sec[key].title;
+      const tge = document.getElementById(tagid); if(tge) tge.textContent = sec[key].tag;
+    }
+  });
+  document.querySelectorAll('.filter-btn[data-ja]').forEach(btn => {
+    btn.textContent = btn.dataset[lang] || btn.textContent;
+  });
+  document.querySelectorAll('[data-ja][data-en]').forEach(el => {
+    if (el.classList.contains('filter-btn')) return;
+    const val = el.dataset[lang];
+    if (val !== undefined) el.innerHTML = val;
+  });
+}
+
+function filterTeam(team, btn) {
+  activeTeam = team;
+  document.querySelectorAll('.filter-bar .filter-btn:not(.jl-btn)').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+function filterJL(jl, btn) {
+  activeJL = jl;
+  document.querySelectorAll('.filter-btn.jl-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+function applyFilters() {
+  document.querySelectorAll('.section').forEach(section => {
+    const team = section.dataset.team;
+    let show = false;
+    if (activeTeam === 'all') show = true;
+    else if (activeTeam === 'dev') show = (team === 'dev');
+    else if (activeTeam === 'devmgr') show = (team === 'devmgr');
+    else show = (activeTeam === team);
+    section.style.display = show ? 'block' : 'none';
+  });
+  document.querySelectorAll('.jl-col').forEach(col => {
+    const jl = parseInt(col.dataset.jl);
+    if (activeJL === 'all') { col.classList.remove('highlighted','dimmed'); }
+    else { col.classList.toggle('highlighted', jl === activeJL); col.classList.toggle('dimmed', jl !== activeJL); }
+  });
+}
+
+window.addEventListener('hashchange', () => {
+  const target = document.querySelector(location.hash);
+  if (target) {
+    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    target.style.outline = '3px solid #1D9E75'; target.style.borderRadius = '14px';
+    setTimeout(() => { target.style.outline = ''; }, 2000);
+  }
+});
+if (location.hash) setTimeout(() => window.dispatchEvent(new Event('hashchange')), 300);
+
+setLang(lang);
+</script>
+</body>
+</html>
